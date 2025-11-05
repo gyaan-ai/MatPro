@@ -17,14 +17,14 @@ export async function signupAction(formData: FormData) {
     return { error: 'All fields are required' }
   }
 
-  const supabase = await createServerComponentClient()
   const serviceRoleClient = await createServiceRoleClient()
 
   try {
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Create auth user using service role client (admin access)
+    const { data: authData, error: authError } = await serviceRoleClient.auth.admin.createUser({
       email,
       password,
+      email_confirm: true, // Auto-confirm email
     })
 
     if (authError || !authData.user) {
@@ -85,9 +85,17 @@ export async function signupAction(formData: FormData) {
 
     if (profileError) {
       // Clean up if profile creation fails
-      await serviceRoleClient.auth.admin.deleteUser(authData.user.id)
-      await serviceRoleClient.from('organizations').delete().eq('id', organization.id)
-      return { error: 'Failed to create profile' }
+      try {
+        await serviceRoleClient.auth.admin.deleteUser(authData.user.id)
+      } catch (deleteError) {
+        console.error('Failed to delete user during cleanup:', deleteError)
+      }
+      try {
+        await serviceRoleClient.from('organizations').delete().eq('id', organization.id)
+      } catch (deleteError) {
+        console.error('Failed to delete organization during cleanup:', deleteError)
+      }
+      return { error: profileError.message || 'Failed to create profile' }
     }
 
     revalidatePath('/dashboard')

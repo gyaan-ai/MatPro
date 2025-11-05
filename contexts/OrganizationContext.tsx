@@ -21,11 +21,21 @@ const OrganizationContext = createContext<OrganizationContextType>({
   refresh: async () => {},
 })
 
+// Create a single Supabase client instance for the context
+let supabaseInstance: ReturnType<typeof createClientComponentClient> | null = null
+
+function getSupabaseClient() {
+  if (!supabaseInstance) {
+    supabaseInstance = createClientComponentClient()
+  }
+  return supabaseInstance
+}
+
 export function OrganizationProvider({ children }: { children: React.ReactNode }) {
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   const fetchOrganization = async () => {
     try {
