@@ -5,13 +5,38 @@ export async function createServerComponentClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  // During build time, env vars may not be available
+  // Return a minimal client that won't throw errors
   if (!url || !key) {
-    // Return a mock client during build time
-    // This will be replaced with real client at runtime
-    return createClient(
-      url || 'https://placeholder.supabase.co',
-      key || 'placeholder-key'
-    )
+    // Return a client with placeholder values that won't validate
+    // This prevents errors during build, but won't work at runtime
+    const cookieStore = await cookies()
+    try {
+      return createClient(
+        'https://placeholder.supabase.co',
+        'placeholder-anon-key',
+        {
+          auth: {
+            storage: {
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {},
+            },
+          },
+        }
+      )
+    } catch {
+      // If even placeholder fails, return a minimal object
+      return {
+        auth: {
+          getUser: async () => ({ data: { user: null }, error: null }),
+          getSession: async () => ({ data: { session: null }, error: null }),
+        },
+        from: () => ({
+          select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }) }) }),
+        }),
+      } as any
+    }
   }
 
   const cookieStore = await cookies()

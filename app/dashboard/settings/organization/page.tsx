@@ -1,4 +1,5 @@
 import { createServerComponentClient } from '@/lib/supabase/server'
+export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { OrganizationForm } from '@/components/settings/organization-form'
 

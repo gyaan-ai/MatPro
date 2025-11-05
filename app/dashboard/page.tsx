@@ -1,4 +1,5 @@
 import { createServerComponentClient } from '@/lib/supabase/server'
+export const dynamic = 'force-dynamic'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { Users, TrendingUp, Calendar } from 'lucide-react'
 

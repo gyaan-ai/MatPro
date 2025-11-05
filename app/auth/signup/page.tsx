@@ -1,4 +1,5 @@
 import { SignupForm } from '@/components/auth/signup-form'
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 
 export default function SignupPage() {
