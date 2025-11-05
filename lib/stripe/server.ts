@@ -1,13 +1,26 @@
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set')
+let stripeInstance: Stripe | null = null
+
+function getStripeInstance(): Stripe {
+  if (!stripeInstance) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not set')
+    }
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2023-10-16',
+      typescript: true,
+    })
+  }
+  return stripeInstance
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16',
-  typescript: true,
-})
+// Lazy getter - only initializes when accessed, not at module load
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    return getStripeInstance()[prop as keyof Stripe]
+  },
+}) as Stripe
 
 export const STRIPE_PRICE_IDS = {
   starter: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER!,
