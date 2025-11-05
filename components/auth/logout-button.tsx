@@ -1,26 +1,17 @@
 'use client'
 
+import { createClientComponentClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { LogOut } from 'lucide-react'
-import { useOrganization } from '@/contexts/OrganizationContext'
-
-// Singleton for client instance
-let logoutClientInstance: ReturnType<typeof import('@/lib/supabase/client').createClientComponentClient> | null = null
-
-function getLogoutClient() {
-  if (!logoutClientInstance) {
-    const { createClientComponentClient } = require('@/lib/supabase/client')
-    logoutClientInstance = createClientComponentClient()
-  }
-  return logoutClientInstance
-}
+import { useMemo } from 'react'
 
 export function LogoutButton() {
   const router = useRouter()
+  // Use useMemo to ensure we only create one client instance per component
+  const supabase = useMemo(() => createClientComponentClient(), [])
 
   async function handleLogout() {
-    const supabase = getLogoutClient()
     await supabase.auth.signOut()
     router.push('/auth/login')
     router.refresh()
