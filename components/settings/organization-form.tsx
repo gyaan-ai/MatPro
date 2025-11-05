@@ -46,7 +46,7 @@ export function OrganizationForm({ organization }: OrganizationFormProps) {
       <CardHeader>
         <CardTitle>Organization Information</CardTitle>
         <CardDescription>
-          Update your organization's name and branding
+          Update your organization&apos;s name and branding
         </CardDescription>
       </CardHeader>
       <CardContent>
