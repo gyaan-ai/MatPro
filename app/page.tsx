@@ -3,12 +3,18 @@ import { createServerComponentClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   const supabase = await createServerComponentClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  
+  // Only check auth if env vars are available
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (user) {
-    redirect('/dashboard')
+    if (user) {
+      redirect('/dashboard')
+    }
   }
 
   return (
